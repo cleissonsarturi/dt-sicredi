@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@theme {
+  --color-marca-50: #f1f9ec;
+  --color-marca-100: #ddf0d0;
+  --color-marca-500: #3fa110;
+  --color-marca-600: #33820d;
+  --color-marca-700: #146e37;
+  --color-marca-900: #0d3f20;
+}
+
+body {
+  @apply bg-slate-50 text-slate-800;
+}
+
+/* Campos de formulário padronizados */
+@utility campo {
+  @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition placeholder:text-slate-400 focus:border-marca-500 focus:ring-2 focus:ring-marca-100 disabled:bg-slate-100;
+}
+@utility rotulo {
+  @apply mb-1 block text-sm font-medium text-slate-700;
+}
+@utility botao {
+  @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
+}
+@utility botao-primario {
+  @apply botao bg-marca-600 text-white hover:bg-marca-700 focus-visible:ring-marca-500;
+}
+@utility botao-secundario {
+  @apply botao border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus-visible:ring-slate-400;
+}
+@utility botao-perigo {
+  @apply botao bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500;
+}
+@utility cartao {
+  @apply rounded-lg border border-slate-200 bg-white shadow-sm;
+}

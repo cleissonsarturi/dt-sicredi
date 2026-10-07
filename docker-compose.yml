@@ -1,0 +1,61 @@
+# Antes de subir: cp .env.example .env (e preencha os valores)
+# Sobe a stack completa:            docker compose up -d --build
+# Apenas o banco (desenvolvimento): docker compose up -d postgres
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: sicredi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?defina POSTGRES_USER no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: ${POSTGRES_DB:-solicitacoes}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./sicredi-backend
+    container_name: sicredi-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      CORS_ORIGIN: http://localhost:3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:?defina POSTGRES_USER no .env}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      DB_NAME: ${POSTGRES_DB:-solicitacoes}
+      DB_MIGRATIONS_RUN: "true"
+      INTEGRACAO_URL: ${INTEGRACAO_URL:-}
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
+      USUARIO_INICIAL_NOME: ${USUARIO_INICIAL_NOME:-Administrador}
+      USUARIO_INICIAL_EMAIL: ${USUARIO_INICIAL_EMAIL:?defina USUARIO_INICIAL_EMAIL no .env}
+      USUARIO_INICIAL_SENHA: ${USUARIO_INICIAL_SENHA:?defina USUARIO_INICIAL_SENHA no .env}
+    ports:
+      - "3001:3001"
+
+  frontend:
+    build: ./sicredi-frontend
+    container_name: sicredi-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      API_URL: http://backend:3001/api/v1
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
